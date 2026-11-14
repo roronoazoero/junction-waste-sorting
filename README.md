@@ -18,3 +18,11 @@ Source data: Kaggle `mostafaabla/garbage-classification` and the real-world phot
 python model/prepare_data.py prepare <garbage_dir> <household_dir> <out_dir>
 python model/prepare_data.py upload <out_dir>   # reads the API key from ~/.ei_key
 ```
+
+## Trained model
+`model/exported/` holds the model trained in Edge Impulse (MobileNetV2 160x160 0.5):
+- `waste_float32.tflite` – full precision, the one to use on the UNO Q
+- `waste_int8.tflite` – compressed version
+- `labels.txt` – output order: bio, mixed, plastic
+
+Input is a 160x160 RGB image. On 302 held-out test images it scores 87% (14 Nov, with our first demo-item photos added).
