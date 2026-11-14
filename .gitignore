@@ -14,3 +14,6 @@ __pycache__/
 
 # web app source (not a dataset)
 !web/src/data/
+
+# local device IDs and settings (never commit)
+config.local.json
