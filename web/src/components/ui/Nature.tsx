@@ -1,12 +1,28 @@
 // Minimal plant artwork, drawn in code so the site needs no image files.
 
+import { useInView } from 'motion/react'
+import { useEffect, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
+
 const P0 = [110, 420]
 const P1 = [40, 220]
 const P2 = [150, 10]
 const LEAF = 'M0 0 C 18 -22 52 -22 70 0 C 52 22 18 22 0 0Z'
 
-/** A single curved stem with leaves on alternating sides. Colour comes from `currentColor`. */
+/**
+ * A single curved stem with leaves on alternating sides. Colour comes from `currentColor`.
+ * It grows the first time it scrolls into view: the stem draws upward, then each leaf unfolds.
+ */
 export function Sprig({ className = '', leaves = 7 }: { className?: string; leaves?: number }) {
+  const ref = useRef<SVGSVGElement>(null)
+  const inView = useInView(ref, { once: true, margin: '0px 0px -5% 0px' })
+  // Plants already on screen when the page opens grow at once, without waiting for an observer.
+  const [onScreenAtStart, setOnScreenAtStart] = useState(false)
+  useEffect(() => {
+    const r = ref.current?.getBoundingClientRect()
+    if (r && r.top < window.innerHeight && r.bottom > 0) setOnScreenAtStart(true)
+  }, [])
+
   const items = Array.from({ length: leaves }, (_, i) => {
     const t = (i + 1) / (leaves + 1)
     const u = 1 - t
@@ -18,16 +34,28 @@ export function Sprig({ className = '', leaves = 7 }: { className?: string; leav
     return { x, y, angle, scale: 1.25 - t * 0.6 }
   })
   return (
-    <svg viewBox="0 0 240 430" className={className} fill="currentColor" overflow="visible" aria-hidden="true">
+    <svg
+      ref={ref}
+      viewBox="0 0 240 430"
+      className={`sprig ${className}`}
+      data-grow={inView || onScreenAtStart}
+      fill="currentColor"
+      overflow="visible"
+      aria-hidden="true"
+    >
       <path
+        className="sprig-stem"
         d={`M${P0[0]} ${P0[1]} Q${P1[0]} ${P1[1]} ${P2[0]} ${P2[1]}`}
+        pathLength={1}
         fill="none"
         stroke="currentColor"
         strokeWidth="3"
         strokeLinecap="round"
       />
       {items.map((l, i) => (
-        <path key={i} d={LEAF} transform={`translate(${l.x} ${l.y}) rotate(${l.angle}) scale(${l.scale})`} />
+        <g key={i} transform={`translate(${l.x} ${l.y}) rotate(${l.angle})`}>
+          <path className="sprig-leaf" d={LEAF} style={{ '--s': l.scale, '--i': i } as CSSProperties} />
+        </g>
       ))}
     </svg>
   )

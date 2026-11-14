@@ -1,7 +1,13 @@
 import { motion, useReducedMotion, useSpring, useTransform } from 'motion/react'
 import type { MotionValue } from 'motion/react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, MouseEvent, ReactNode } from 'react'
+import { BananaPeel } from './Peel'
 import './station3d.css'
+
+export type Bin = 'bio' | 'plastic' | 'mixed'
+export type HoleState = 'off' | 'lit' | 'chosen' | 'wrong'
+export type GridState = 'off' | 'class' | 'ok' | 'bad'
+export type Tone = 'neutral' | 'ok' | 'bad'
 
 // Colours of the physical build: the 3D-printed orange body and the white bin.
 const ORANGE = '#e9a21f'
@@ -70,30 +76,44 @@ const BIN_D = 150
 const BIN_Y = 40
 const BIN_TOP = BIN_Y - BIN_H / 2
 const ROBOT_Z = -45
+const BODY_H = 84
+const BODY_TOP = BIN_TOP - 7 - 16 - BODY_H
 
-function Robot({ step, screen }: { step: number; screen: string }) {
+function Robot({
+  screen,
+  tone,
+  buttonsLit,
+  grid,
+  speakerOn,
+}: {
+  screen: string
+  tone: Tone
+  buttonsLit: boolean
+  grid: GridState
+  speakerOn: boolean
+}) {
   const bodyW = 120
-  const bodyH = 84
   const footH = 7
   const legH = 16
   const footY = BIN_TOP - footH / 2
   const legY = BIN_TOP - footH - legH / 2
   const bodyBottom = BIN_TOP - footH - legH
-  const bodyY = bodyBottom - bodyH / 2
-  const bodyTop = bodyBottom - bodyH
+  const bodyY = bodyBottom - BODY_H / 2
   const armX = bodyW / 2 + 7
 
   const panel = (
     <div className="s3-panel">
       <div className="s3-buttons">
         {[0, 1, 2].map((i) => (
-          <span key={i} data-lit={step === 2} />
+          <span key={i} data-lit={buttonsLit} />
         ))}
       </div>
-      <div className="s3-speaker" data-on={step === 3} />
+      <div className="s3-speaker" data-on={speakerOn} />
       <div className="s3-sensor" />
-      <div className="s3-grid" data-state={step === 1 ? 'class' : step === 3 ? 'ok' : 'off'} />
-      <div className="s3-screen">{screen}</div>
+      <div className="s3-grid" data-state={grid} />
+      <div className="s3-screen" data-tone={tone}>
+        {screen}
+      </div>
       <span className="s3-pin" />
     </div>
   )
@@ -106,7 +126,7 @@ function Robot({ step, screen }: { step: number; screen: string }) {
       {[-28, 28].map((x) => (
         <Box key={`leg${x}`} w={22} h={legH} d={26} x={x} y={legY} z={ROBOT_Z} color={ORANGE} />
       ))}
-      <Box w={bodyW} h={bodyH} d={60} y={bodyY} z={ROBOT_Z} color={ORANGE} front={panel} />
+      <Box w={bodyW} h={BODY_H} d={60} y={bodyY} z={ROBOT_Z} color={ORANGE} front={panel} />
       {[-armX, armX].map((x) => (
         <div key={`arm${x}`}>
           <Box w={14} h={70} d={16} x={x} y={bodyBottom - 56} z={ROBOT_Z} color={ORANGE} />
@@ -114,20 +134,40 @@ function Robot({ step, screen }: { step: number; screen: string }) {
           <Box w={5} h={14} d={16} x={x + 4.5} y={bodyBottom - 98} z={ROBOT_Z} color={ORANGE} />
         </div>
       ))}
-      <Box w={26} h={12} d={24} y={bodyTop - 6} z={ROBOT_Z} color={DARK} />
-      <Camera x={0} y={bodyTop - 12 - 20} z={ROBOT_Z} />
+      <Box w={26} h={12} d={24} y={BODY_TOP - 6} z={ROBOT_Z} color={DARK} />
+      <Camera x={0} y={BODY_TOP - 12 - 20} z={ROBOT_Z} />
     </>
   )
 }
 
+const BIN_LABEL: Record<Bin, string> = { bio: 'Bio', plastic: 'Plastic', mixed: 'Mixed' }
+
 export function Station3D({
-  step,
   screen,
+  tone = 'neutral',
+  buttonsLit = false,
+  grid = 'off',
+  speakerOn = false,
+  holes,
+  interactive = false,
+  showPeel = false,
+  onPickUp,
+  onDrop,
   pointerX,
   pointerY,
 }: {
-  step: number
   screen: string
+  tone?: Tone
+  buttonsLit?: boolean
+  grid?: GridState
+  speakerOn?: boolean
+  holes: Record<Bin, HoleState>
+  /** When true the bin openings can be clicked. */
+  interactive?: boolean
+  /** Show the banana peel floating in front of the camera, waiting to be picked up. */
+  showPeel?: boolean
+  onPickUp?: (e: MouseEvent<HTMLButtonElement>) => void
+  onDrop?: (bin: Bin, target: HTMLElement) => void
   /** Pointer position over the section, each in -1..1. */
   pointerX: MotionValue<number>
   pointerY: MotionValue<number>
@@ -139,20 +179,19 @@ export function Station3D({
   const rotateX = useTransform(sy, (v) => -16 - (reduce ? 0 : v * 4))
   const rotateY = useTransform(sx, (v) => -26 + (reduce ? 0 : v * 9))
 
-  const holeState = (bin: 'bio' | 'plastic' | 'mixed') => {
-    if (step === 2) return 'lit'
-    if (step >= 3 && bin === 'plastic') return 'chosen'
-    return 'off'
-  }
-
-  const dropped = step >= 3
-  const bodyTop = BIN_TOP - 7 - 16 - 84
-  const itemTransform = dropped
-    ? 'translate3d(0px, -38px, 25px) rotateZ(62deg) scale(0.7)'
-    : `translate3d(62px, ${bodyTop - 30}px, 40px) rotateZ(-12deg)`
+  const hole = (bin: Bin, extra = '') => (
+    <button
+      type="button"
+      className={`s3-hole ${extra}`}
+      data-state={holes[bin]}
+      disabled={!interactive}
+      aria-label={`${BIN_LABEL[bin]} bin`}
+      onClick={(e) => onDrop?.(bin, e.currentTarget)}
+    />
+  )
 
   return (
-    <div className="s3-scene" aria-hidden="true">
+    <div className="s3-scene">
       <motion.div className="s3-world" style={{ rotateX, rotateY }}>
         <div
           className="s3-shadow"
@@ -175,22 +214,29 @@ export function Station3D({
           }
           top={
             <div className="s3-lid">
-              <span className="s3-hole" data-state={holeState('bio')} />
-              <span className="s3-hole s3-slot" data-state={holeState('plastic')} />
-              <span className="s3-hole" data-state={holeState('mixed')} />
+              {hole('bio')}
+              {hole('plastic', 's3-slot')}
+              {hole('mixed')}
             </div>
           }
         />
 
-        <Robot step={step} screen={screen} />
+        <Robot screen={screen} tone={tone} buttonsLit={buttonsLit} grid={grid} speakerOn={speakerOn} />
 
-        {/* A plastic bottle, held up and then dropped */}
-        <div className="s3-item" data-gone={dropped} data-settled={step >= 4} style={{ transform: itemTransform }}>
-          <div className={dropped ? 's3-group' : 's3-bob'}>
-            <Box w={18} h={34} d={18} color="#5fb8e8" />
-            <Box w={10} h={6} d={10} y={-20} color="#1f6f9a" />
-          </div>
-        </div>
+        {showPeel && (
+          <button
+            type="button"
+            className="s3-peel"
+            // Billboarded: undoes the world's base tilt so the peel faces the viewer.
+            style={{ transform: `translate3d(${92 - 32}px, ${BODY_TOP - 26 - 32}px, 40px) rotateY(26deg) rotateX(16deg)` }}
+            aria-label="Pick up the banana peel"
+            onClick={onPickUp}
+          >
+            <span className="s3-bob">
+              <BananaPeel className="size-full" />
+            </span>
+          </button>
+        )}
       </motion.div>
     </div>
   )

@@ -17,9 +17,7 @@
   transform-style: preserve-3d;
 }
 .s3-box,
-.s3-group,
-.s3-item,
-.s3-bob {
+.s3-group {
   position: absolute;
   left: 0;
   top: 0;
@@ -107,7 +105,11 @@
   position: relative;
   width: 58px;
   height: 58px;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
+  appearance: none;
+  cursor: inherit;
   background: radial-gradient(circle at 40% 35%, #2b2c31, #0a0b0e 72%);
   --rim: 0 0 0 0 transparent, 0 0 0 transparent;
   box-shadow: inset 0 3px 5px rgb(0 0 0 / 0.7), var(--rim);
@@ -121,8 +123,43 @@
 .s3-hole[data-state="lit"] {
   --rim: 0 0 0 3px rgb(245 241 232 / 0.9), 0 0 18px rgb(245 241 232 / 0.5);
 }
+.s3-hole:enabled:hover,
+.s3-hole:focus-visible {
+  --rim: 0 0 0 4px var(--color-lime), 0 0 22px rgb(139 224 78 / 0.6);
+  outline: none;
+}
 .s3-hole[data-state="chosen"] {
   --rim: 0 0 0 3px var(--color-lime), 0 0 26px rgb(139 224 78 / 0.75);
+}
+.s3-hole[data-state="wrong"] {
+  --rim: 0 0 0 3px var(--color-wrong), 0 0 26px rgb(217 72 43 / 0.75);
+}
+
+/* The peel waiting in front of the camera. */
+.s3-peel {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.s3-peel .s3-bob {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 8px 10px rgb(0 0 0 / 0.45));
+  transition: transform 200ms var(--ease-out-strong);
+}
+.s3-peel:hover .s3-bob,
+.s3-peel:focus-visible .s3-bob {
+  scale: 1.1;
+}
+.s3-peel:focus-visible {
+  outline: none;
 }
 /* The distance sensor noticing the drop. */
 .s3-hole[data-state="chosen"]::after {
@@ -211,12 +248,20 @@
   background: radial-gradient(circle, var(--dot) 2px, transparent 2.4px) 0 0 / 7px 7px;
 }
 .s3-grid[data-state="class"] {
-  --dot: var(--color-plastic);
-  filter: drop-shadow(0 0 4px var(--color-plastic));
+  --dot: var(--color-bio);
+  filter: drop-shadow(0 0 4px var(--color-bio));
 }
 .s3-grid[data-state="ok"] {
   --dot: var(--color-lime);
   filter: drop-shadow(0 0 4px var(--color-lime));
+}
+.s3-grid[data-state="bad"] {
+  --dot: var(--color-wrong);
+  filter: drop-shadow(0 0 4px var(--color-wrong));
+}
+.s3-screen[data-tone="bad"] {
+  color: #ff7a5c;
+  background: #1c0906;
 }
 .s3-screen {
   position: absolute;
@@ -278,21 +323,11 @@
   background: rgb(255 255 255 / 0.8);
 }
 
-/* The item: floats by the camera, then drops into the bin. */
-.s3-item {
-  transition: transform 750ms var(--ease-in-out-strong), opacity 250ms ease 520ms;
-}
-.s3-item[data-gone="true"] {
-  opacity: 0;
-}
-.s3-item[data-gone="true"][data-settled="true"] {
-  transition-delay: 0ms;
-}
 .s3-bob {
   animation: s3-bob 3s ease-in-out infinite;
 }
 @keyframes s3-bob {
-  50% { transform: translateY(-5px); }
+  50% { transform: translateY(-6px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -301,8 +336,5 @@
   .s3-speaker[data-on="true"],
   .s3-hole[data-state="chosen"]::after {
     animation: none;
-  }
-  .s3-item {
-    transition-property: opacity;
   }
 }
