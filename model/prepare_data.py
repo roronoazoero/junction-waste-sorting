@@ -1,4 +1,4 @@
-"""Prepare the Kaggle garbage dataset for our 3 bins and upload it to Edge Impulse.
+"""Prepare the Kaggle garbage dataset for our 5 bins and upload it to Edge Impulse.
 
 Usage:
     python prepare_data.py prepare <raw_dir> <out_dir>
@@ -17,8 +17,10 @@ from PIL import Image
 # our bin -> {source folder: how many images to take}
 CLASSES = {
     "plastic": {"plastic": 200},
-    "paper": {"paper": 100, "cardboard": 100},
+    "paper": {"paper": 200},
+    "cardboard": {"cardboard": 200},
     "bio": {"biological": 200},
+    "mixed": {"trash": 200},
 }
 TEST_FRACTION = 0.2
 MAX_SIDE = 320
@@ -45,8 +47,14 @@ def prepare(raw: Path, out: Path) -> None:
             img.thumbnail((MAX_SIDE, MAX_SIDE))
             dest = out / split / label
             dest.mkdir(parents=True, exist_ok=True)
-            img.save(dest / f"{label}.{src.parent.name}_{src.stem}.jpg", quality=88)
+            name = f"{label}.{src.parent.name}_{src.stem}"
+            img.save(dest / f"{name}.jpg", quality=88)
             kept[split] += 1
+            if split == "training":
+                # one extra rotated copy so the model does not rely on orientation
+                angle = rng.choice([90, 180, 270])
+                img.rotate(angle, expand=True).save(dest / f"{name}_rot{angle}.jpg", quality=88)
+                kept[split] += 1
         print(f"{label}: {kept['training']} training, {kept['testing']} testing")
 
 

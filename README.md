@@ -11,8 +11,8 @@ the game: buttons for each bin, sounds, faces and lights.
 - `body/` – enclosure files (to come)
 
 ## Model
-Classes: `plastic`, `paper` (paper + cardboard), `bio`, and `nothing` (empty scan zone, added from our own photos).
-Source data: Kaggle `mostafaabla/garbage-classification`, 200 images per class, 80/20 split.
+Classes: `plastic`, `paper`, `cardboard`, `bio`, `mixed`, and `nothing` (empty scan zone, added from our own photos).
+Source data: Kaggle `mostafaabla/garbage-classification`, 200 images per class, 80/20 split, plus one rotated copy of each training image.
 
 ```bash
 python model/prepare_data.py prepare <kaggle_raw_dir> <out_dir>
