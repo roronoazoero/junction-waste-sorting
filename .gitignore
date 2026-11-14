@@ -17,3 +17,4 @@ __pycache__/
 
 # local device IDs and settings (never commit)
 config.local.json
+unoq-app/python/config.json
