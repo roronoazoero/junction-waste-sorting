@@ -1,0 +1,308 @@
+/* The sorting station in 3D, built from CSS only: every solid is a box of six faces
+   inside a preserve-3d world. Positions are in px around the world origin (y down). */
+
+.s3-scene {
+  position: relative;
+  width: 480px;
+  height: 440px;
+  perspective: 1400px;
+  perspective-origin: 50% 40%;
+}
+.s3-world {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+.s3-box,
+.s3-group,
+.s3-item,
+.s3-bob {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-style: preserve-3d;
+}
+
+/* Faces of a box. --w --h --d are its size, --c its colour; sides are shaded from it. */
+.s3-face {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.s3-front,
+.s3-back {
+  width: var(--w);
+  height: var(--h);
+  margin: calc(var(--h) / -2) 0 0 calc(var(--w) / -2);
+}
+.s3-left,
+.s3-right {
+  width: var(--d);
+  height: var(--h);
+  margin: calc(var(--h) / -2) 0 0 calc(var(--d) / -2);
+}
+.s3-top,
+.s3-bottom {
+  width: var(--w);
+  height: var(--d);
+  margin: calc(var(--d) / -2) 0 0 calc(var(--w) / -2);
+}
+.s3-front  { transform: translateZ(calc(var(--d) / 2)); background: var(--c); }
+.s3-back   { transform: rotateY(180deg) translateZ(calc(var(--d) / 2)); background: color-mix(in oklab, var(--c), black 40%); }
+.s3-right  { transform: rotateY(90deg) translateZ(calc(var(--w) / 2)); background: color-mix(in oklab, var(--c), black 24%); }
+.s3-left   { transform: rotateY(-90deg) translateZ(calc(var(--w) / 2)); background: color-mix(in oklab, var(--c), black 8%); }
+.s3-top    { transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); background: color-mix(in oklab, var(--c), white 16%); }
+.s3-bottom { transform: rotateX(-90deg) translateZ(calc(var(--h) / 2)); background: color-mix(in oklab, var(--c), black 50%); }
+
+/* Ground shadow under the bin. */
+.s3-shadow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 460px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgb(0 0 0 / 0.7), transparent 70%);
+  transform-origin: 0 0;
+}
+
+/* The bin: ribbed bands near the top and bottom edge, like the real one. */
+.s3-bin .s3-front,
+.s3-bin .s3-right,
+.s3-bin .s3-left {
+  background-image:
+    repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.08) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.08) 0 1px, transparent 1px 3px);
+  background-size: 100% 16px, 100% 16px;
+  background-position: 0 8px, 0 calc(100% - 8px);
+  background-repeat: no-repeat;
+}
+.s3-labels {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding-top: 34px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #41463f;
+}
+.s3-lid {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  padding-top: 52px;
+}
+.s3-hole {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #2b2c31, #0a0b0e 72%);
+  --rim: 0 0 0 0 transparent, 0 0 0 transparent;
+  box-shadow: inset 0 3px 5px rgb(0 0 0 / 0.7), var(--rim);
+  transition: box-shadow 300ms ease;
+}
+.s3-slot {
+  width: 86px;
+  height: 52px;
+  border-radius: 6px;
+}
+.s3-hole[data-state="lit"] {
+  --rim: 0 0 0 3px rgb(245 241 232 / 0.9), 0 0 18px rgb(245 241 232 / 0.5);
+}
+.s3-hole[data-state="chosen"] {
+  --rim: 0 0 0 3px var(--color-lime), 0 0 26px rgb(139 224 78 / 0.75);
+}
+/* The distance sensor noticing the drop. */
+.s3-hole[data-state="chosen"]::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid var(--color-lime);
+  animation: s3-ping 900ms var(--ease-out-strong) both;
+}
+@keyframes s3-ping {
+  from { transform: scale(0.7); opacity: 1; }
+  to { transform: scale(1.6); opacity: 0; }
+}
+
+/* The robot's front: dark panel with screen, buttons, speaker, sensor and light grid. */
+.s3-panel {
+  position: absolute;
+  inset: 6px;
+  border-radius: 4px;
+  background: #1b1d22;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
+}
+.s3-buttons {
+  position: absolute;
+  left: 7px;
+  top: 7px;
+  display: flex;
+  gap: 4px;
+}
+.s3-buttons span {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  background: #3a3d45;
+  transition: background-color 250ms ease, box-shadow 250ms ease;
+}
+.s3-buttons span[data-lit="true"] {
+  background: #f5f1e8;
+  box-shadow: 0 0 10px rgb(245 241 232 / 0.7);
+}
+.s3-speaker {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  width: 32px;
+  height: 20px;
+  border-radius: 3px;
+  background: radial-gradient(circle, #4a4e58 1.1px, transparent 1.4px) 0 0 / 5px 5px, #262930;
+}
+.s3-speaker[data-on="true"] {
+  animation: s3-beat 450ms ease-out 2;
+}
+@keyframes s3-beat {
+  50% { transform: scale(1.14); }
+}
+.s3-sensor {
+  position: absolute;
+  right: 7px;
+  top: 32px;
+  width: 12px;
+  height: 24px;
+  border-radius: 3px;
+  background: #2b2e36;
+}
+.s3-sensor::before,
+.s3-sensor::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #0b0c10;
+  box-shadow: inset 0 0 0 1px #4a4e58;
+}
+.s3-sensor::before { top: 4px; }
+.s3-sensor::after { bottom: 4px; }
+.s3-grid {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  width: 21px;
+  height: 21px;
+  --dot: #3a3d45;
+  background: radial-gradient(circle, var(--dot) 2px, transparent 2.4px) 0 0 / 7px 7px;
+}
+.s3-grid[data-state="class"] {
+  --dot: var(--color-plastic);
+  filter: drop-shadow(0 0 4px var(--color-plastic));
+}
+.s3-grid[data-state="ok"] {
+  --dot: var(--color-lime);
+  filter: drop-shadow(0 0 4px var(--color-lime));
+}
+.s3-screen {
+  position: absolute;
+  left: 7px;
+  bottom: 7px;
+  width: 58px;
+  height: 30px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a1a10;
+  color: var(--color-lime);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+.s3-pin {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #000;
+}
+
+/* The camera head: a stack of thin discs reads as a cylinder; the last disc is the face. */
+.s3-head {
+  animation: s3-scan 7s var(--ease-in-out-strong) infinite alternate;
+}
+@keyframes s3-scan {
+  from { transform: rotateY(-12deg); }
+  to { transform: rotateY(12deg); }
+}
+.s3-disc {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  background: #17181c;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.s3-lens {
+  background: radial-gradient(circle, #04060a 0 20%, #2b2f36 21% 27%, #0b0c0f 28% 60%, #f3efe6 61% 100%);
+  box-shadow: 0 0 16px rgb(243 239 230 / 0.4);
+}
+.s3-lens::after {
+  content: '';
+  position: absolute;
+  left: 42%;
+  top: 36%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.8);
+}
+
+/* The item: floats by the camera, then drops into the bin. */
+.s3-item {
+  transition: transform 750ms var(--ease-in-out-strong), opacity 250ms ease 520ms;
+}
+.s3-item[data-gone="true"] {
+  opacity: 0;
+}
+.s3-item[data-gone="true"][data-settled="true"] {
+  transition-delay: 0ms;
+}
+.s3-bob {
+  animation: s3-bob 3s ease-in-out infinite;
+}
+@keyframes s3-bob {
+  50% { transform: translateY(-5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s3-head,
+  .s3-bob,
+  .s3-speaker[data-on="true"],
+  .s3-hole[data-state="chosen"]::after {
+    animation: none;
+  }
+  .s3-item {
+    transition-property: opacity;
+  }
+}

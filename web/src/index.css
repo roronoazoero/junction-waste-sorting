@@ -87,15 +87,7 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
-.hiw-item {
-  transition: transform 600ms var(--ease-in-out-strong), opacity 300ms var(--ease-out-strong);
-}
-.hiw-bin {
-  transition: background-color 250ms ease, border-color 250ms ease, color 250ms ease;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .word-rise { animation-name: fade-in; }
   .hiw-step { transform: none; transition-property: opacity; }
-  .hiw-item { transition-property: opacity; }
 }

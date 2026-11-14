@@ -91,22 +91,15 @@ function Problem() {
         </div>
       </div>
 
-      <div className="grid border-t border-ink/20 md:grid-cols-3">
-        {[
-          {
-            big: <CountUp value={70} suffix="%" />,
-            text: 'of mixed waste in the Helsinki region could have been recycled.',
-          },
-          { big: <CountUp value={2} />, text: 'materials are lost most often: bio-waste and plastic packaging.' },
-          { big: <CountUp value={1} suffix=" s" />, text: 'is about how long the choice at the bin takes.' },
-        ].map((s, i) => (
-          <div key={i} className="border-ink/20 px-4 py-12 max-md:border-b sm:px-10 md:border-r md:last:border-r-0">
-            <Reveal delay={i * 0.06}>
-              <p className="display text-7xl text-forest sm:text-8xl">{s.big}</p>
-              <p className="mt-4 max-w-xs text-lg text-ink/75">{s.text}</p>
-            </Reveal>
-          </div>
-        ))}
+      <div className="border-t border-ink/20 px-4 py-12 sm:px-10">
+        <Reveal className="flex flex-wrap items-end gap-x-10 gap-y-4">
+          <p className="display text-7xl text-forest sm:text-8xl">
+            <CountUp value={70} suffix="%" />
+          </p>
+          <p className="max-w-sm pb-2 text-lg text-ink/75">
+            of mixed waste in the Helsinki region could have been recycled.
+          </p>
+        </Reveal>
       </div>
     </section>
   )
