@@ -87,15 +87,25 @@ function Problem() {
         </div>
       </div>
 
-      <div className="border-t border-ink/20 px-4 py-12 sm:px-10">
-        <Reveal className="flex flex-wrap items-end gap-x-10 gap-y-4">
-          <p className="display text-7xl text-forest sm:text-8xl">
-            <CountUp value={70} suffix="%" />
-          </p>
-          <p className="max-w-sm pb-2 text-lg text-ink/75">
-            of mixed waste in the Helsinki region could have been recycled.
-          </p>
-        </Reveal>
+      <div className="grid border-t border-ink/20 md:grid-cols-2">
+        <div className="flex items-center px-4 py-12 sm:px-10">
+          <Reveal className="flex flex-wrap items-end gap-x-8 gap-y-4">
+            <p className="display text-7xl text-forest sm:text-8xl">
+              <CountUp value={70} suffix="%" />
+            </p>
+            <p className="max-w-xs pb-2 text-lg text-ink/75">
+              of mixed waste in the Helsinki region could have been recycled.
+            </p>
+          </Reveal>
+        </div>
+        <div className="flex items-center border-t border-ink/20 px-4 py-12 sm:px-10 md:border-t-0 md:border-l">
+          <Reveal delay={0.08} className="flex flex-wrap items-end gap-x-8 gap-y-4">
+            <p className="display max-w-[7em] text-4xl text-forest sm:text-5xl">Binwise makes the change</p>
+            <p className="max-w-xs flex-1 basis-56 pb-2 text-lg text-ink/75">
+              It catches the mistake at the bin, before the item is lost to mixed waste.
+            </p>
+          </Reveal>
+        </div>
       </div>
     </section>
   )
