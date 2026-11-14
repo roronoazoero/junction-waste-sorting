@@ -58,7 +58,7 @@ class DropDetector:
         self.cooldown_seconds = cooldown_seconds
         self.resettle_seconds = resettle_seconds
         self._readings = deque(maxlen=20)
-        self._last_drop = 0.0
+        self._last_drop = float("-inf")
         self._blocked_since = None  # set while something is in front of the sensor
 
     @property
