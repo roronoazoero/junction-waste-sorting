@@ -30,6 +30,8 @@ memory = ItemMemory(
     hold_seconds=CONFIG.get("hold_seconds", 15),
 )
 sockets = {}  # device id -> open websocket
+latest = {"camera": None, "readings": {}}  # for the once-a-second status line
+STATUS_SECONDS = CONFIG.get("status_seconds", 1)  # 0 turns the status line off
 score = {"correct": 0, "wrong": 0}
 
 ui.on_message("override_th", lambda sid, threshold: stream.override_threshold(threshold))
@@ -43,6 +45,7 @@ def on_classifications(classifications: dict):
     """Called by the camera brick for every classified frame."""
     if not classifications:
         return
+    latest["camera"] = max(classifications.items(), key=lambda kv: kv[1])
     locked = memory.update(classifications)
     if locked:
         log(f"item locked in: {locked}")
@@ -116,7 +119,6 @@ async def watch_bin(device_id):
         min_drop_mm=CONFIG.get("min_drop_mm", 60),
         cooldown_seconds=CONFIG.get("cooldown_seconds", 2.5),
     )
-    last_report = 0.0
     while True:
         try:
             async with websockets.connect(GATEWAY + device_id) as ws:
@@ -132,21 +134,34 @@ async def watch_bin(device_id):
                     distance = find_distance(message)
                     if distance is not None:
                         dropped = dropped or detector.update(distance)
-                        if time.time() - last_report > 10:
-                            last_report = time.time()
-                            log(f"{bin_type} bin: reading {distance:.0f} mm, usual {detector.baseline}")
+                        latest["readings"][bin_type] = distance
                     if dropped:
                         await handle_drop(device_id)
         except Exception as err:  # network drops are expected on venue Wi-Fi
             log(f"{bin_type} board disconnected ({type(err).__name__}), retrying in 3 s")
         finally:
             sockets.pop(device_id, None)
+            latest["readings"].pop(bin_type, None)
         await asyncio.sleep(3)
 
 
 async def atech_main():
     await asyncio.gather(*(watch_bin(device_id) for device_id in BINS))
 
+
+def status_loop():
+    """One compact line per second: what the camera sees, what is remembered, each bin's reading."""
+    while True:
+        time.sleep(STATUS_SECONDS)
+        cam = latest["camera"]
+        seen = f"{cam[0]} {cam[1] if cam[1] <= 1 else cam[1] / 100:.2f}" if cam else "-"
+        bins = "  ".join(f"{b}={latest['readings'][b]:.0f}mm" if b in latest["readings"] else f"{b}=offline"
+                         for b in ("bio", "plastic", "mixed") if b in BINS.values())
+        log(f"camera: {seen} | holding: {memory.current() or '-'} | {bins}")
+
+
+if STATUS_SECONDS:
+    threading.Thread(target=status_loop, daemon=True).start()
 
 valid = {d: b for d, b in BINS.items() if b in ("bio", "plastic", "mixed")}
 if len(valid) != len(BINS) or not BINS:
