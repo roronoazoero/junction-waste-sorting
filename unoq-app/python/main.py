@@ -19,6 +19,7 @@ from game import DropDetector, ItemMemory, judge
 CONFIG = json.loads((Path(__file__).parent / "config.json").read_text())
 BINS = {b["device_id"]: b["bin"] for b in CONFIG["bins"]}  # device id -> bio / plastic / mixed
 ACTIONS = CONFIG.get("actions", {"correct": "correct", "wrong": "wrong", "here": "here"})
+FEEDBACK = CONFIG.get("feedback_device")  # board with the screen and speaker; if unset, each bin answers itself
 GATEWAY = "wss://gateway.atech.dev/ws/live/"
 
 ui = WebUI()
@@ -55,15 +56,24 @@ stream.on_detect_all(on_classifications)
 
 
 def find_distance(message):
-    """Pull a distance reading in mm out of whatever shape the board sends."""
-    payload = message.get("payload", message)
-    if isinstance(payload, dict) and isinstance(payload.get("payload"), dict):
-        payload = payload["payload"]  # device_event wrapping a distance message
-    if not isinstance(payload, dict):
-        return None
-    for key in ("min_mm", "distance_mm", "mm", "distance"):
-        if isinstance(payload.get(key), (int, float)):
-            return float(payload[key])
+    """Pull a distance reading in mm out of whatever shape the board sends.
+
+    The gateway wraps board output as
+    {"type":"device_event","payload":{"event_type":"log","value":"<JSON text of the distance message>"}}
+    """
+    for _ in range(4):  # unwrap nested payloads and JSON text
+        if not isinstance(message, dict):
+            return None
+        for key in ("min_mm", "distance_mm", "mm", "distance"):
+            if isinstance(message.get(key), (int, float)):
+                return float(message[key])
+        inner = message.get("payload", message.get("value"))
+        if isinstance(inner, str) and inner.lstrip().startswith("{"):
+            try:
+                inner = json.loads(inner)
+            except ValueError:
+                return None
+        message = inner
     return None
 
 
@@ -84,11 +94,15 @@ async def handle_drop(device_id):
     if result == "no_item":
         return
     score[result] += 1
-    await send(device_id, ACTIONS[result], item)
-    if result == "wrong":
-        for other_id, other_bin in BINS.items():
-            if other_bin == item:
-                await send(other_id, ACTIONS["here"], item)
+    if FEEDBACK:
+        # value tells the screen which bin the item belongs in
+        await send(FEEDBACK, ACTIONS[result], item)
+    else:
+        await send(device_id, ACTIONS[result], item)
+        if result == "wrong":
+            for other_id, other_bin in BINS.items():
+                if other_bin == item:
+                    await send(other_id, ACTIONS["here"], item)
     memory.clear()
     ui.send_message("game", message=json.dumps(
         {"event": "result", "result": result, "item": item, "bin": bin_type, "score": score}))
