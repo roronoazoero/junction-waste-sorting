@@ -107,19 +107,8 @@ body {
   to { transform: scale(var(--s)); }
 }
 
-/* How-it-works: step texts cross-fade as the demo moves on. */
-.hiw-step {
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 350ms var(--ease-out-strong), transform 350ms var(--ease-out-strong);
-}
-.hiw-step[data-active="true"] {
-  opacity: 1;
-  transform: translateY(0);
-}
 @media (prefers-reduced-motion: reduce) {
   .word-rise { animation-name: fade-in; }
-  .hiw-step { transform: none; transition-property: opacity; }
   .sprig .sprig-stem { animation: none; stroke-dashoffset: 0; }
   .sprig .sprig-leaf { animation: none; transform: scale(var(--s)); }
 }

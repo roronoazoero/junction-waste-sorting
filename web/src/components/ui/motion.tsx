@@ -5,14 +5,25 @@ import type { ReactNode } from 'react'
 
 export const EASE_OUT = [0.23, 1, 0.32, 1] as const
 
+let lenis: Lenis | null = null
+
 /** Smooth scrolling for the story page. Off when the visitor prefers reduced motion. */
 export function useSmoothScroll() {
   const reduce = useReducedMotion()
   useEffect(() => {
     if (reduce) return
-    const lenis = new Lenis({ autoRaf: true })
-    return () => lenis.destroy()
+    lenis = new Lenis({ autoRaf: true })
+    return () => {
+      lenis?.destroy()
+      lenis = null
+    }
   }, [reduce])
+}
+
+/** Scroll the page to `top`, through Lenis when it is running so the two do not fight. */
+export function scrollPageTo(top: number) {
+  if (lenis) lenis.scrollTo(top, { duration: 1.4 })
+  else window.scrollTo({ top, behavior: 'auto' })
 }
 
 /** Fade and rise into place the first time the element scrolls into view. */
