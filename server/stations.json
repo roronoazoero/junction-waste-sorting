@@ -1,0 +1,5 @@
+[
+  { "id": "station-1", "site": "Junction 2026", "floor": "Main hall", "room": "Demo table", "kind": "university", "inputs": "sensor" },
+  { "id": "example-2", "site": "Example Office", "floor": "Floor 4", "room": "Kitchen", "kind": "office", "inputs": "sensor" },
+  { "id": "example-3", "site": "Example School", "floor": "Floor 1", "room": "Canteen", "kind": "school", "inputs": "sensor" }
+]

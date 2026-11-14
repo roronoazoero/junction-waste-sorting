@@ -8,7 +8,7 @@ export function AccuracyTrend({ points }: { points: DayPoint[] }) {
       <h2 className="text-lg font-medium tracking-tight">Accuracy over time</h2>
       <p className="mt-1 text-sm text-white/70">Share of items sorted correctly, per day.</p>
       {points.length < 2 ? (
-        <p className="py-16 text-center text-sm text-white/70">Pick a longer period to see a trend.</p>
+        <p className="py-16 text-center text-sm text-white/70">A trend needs at least two days of data.</p>
       ) : (
         <div className="mt-4 h-56">
           <ResponsiveContainer width="100%" height="100%">

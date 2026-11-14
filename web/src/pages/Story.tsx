@@ -5,7 +5,7 @@ import { HowItWorks } from '../components/story/HowItWorks'
 import { CountUp, Reveal, useSmoothScroll } from '../components/ui/motion'
 import { NatureBackdrop, Sprig } from '../components/ui/Nature'
 import { accuracy, score } from '../data/metrics'
-import { getEvents } from '../data/source'
+import { getEvents, IS_LIVE } from '../data/source'
 
 const WHY = [
   {
@@ -165,10 +165,12 @@ function Cta() {
   const [rate, setRate] = useState<number | null>(null)
   useEffect(() => {
     let live = true
-    getEvents().then((events) => {
-      const value = accuracy(score(events))
-      if (live && value !== null) setRate(Math.round(value * 100))
-    })
+    getEvents()
+      .then((events) => {
+        const value = accuracy(score(events))
+        if (live && value !== null) setRate(Math.round(value * 100))
+      })
+      .catch(() => {})
     return () => {
       live = false
     }
@@ -183,7 +185,7 @@ function Cta() {
           <p className="mt-6 max-w-lg text-xl">
             {rate !== null && (
               <>
-                In the demo data, <strong className="font-semibold">{rate}%</strong> of items are sorted correctly.{' '}
+                {IS_LIVE ? 'So far' : 'In the demo data'}, <strong className="font-semibold">{rate}%</strong> of items are sorted correctly.{' '}
               </>
             )}
             See which building, floor and room does best, and which waste type goes wrong most.

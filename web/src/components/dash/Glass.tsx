@@ -54,7 +54,7 @@ export function Leaderboard({
                       style={{ width: pct(g.accuracy ?? 0) }}
                     />
                   </span>
-                  <span className="mt-1 block text-xs text-white/70">{g.count.toLocaleString()} items sorted</span>
+                  <span className="mt-1 block text-xs text-white/70">{g.count.toLocaleString()} {g.count === 1 ? 'item' : 'items'} sorted</span>
                 </span>
               </span>
             )

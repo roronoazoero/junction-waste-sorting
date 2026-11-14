@@ -18,7 +18,7 @@ import {
   misSortFlows,
   score,
 } from '../data/metrics'
-import { getEmptyings, getEvents, getStations } from '../data/source'
+import { getEmptyings, getEvents, getStations, IS_LIVE } from '../data/source'
 import { BIN_LABEL } from '../data/types'
 import type { EmptiedEvent, SortEvent, Station } from '../data/types'
 
@@ -28,18 +28,27 @@ export default function Dashboard() {
   const [stations, setStations] = useState<Station[]>([])
   const [events, setEvents] = useState<SortEvent[] | null>(null)
   const [emptyings, setEmptyings] = useState<EmptiedEvent[]>([])
+  const [error, setError] = useState(false)
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
 
   useEffect(() => {
     let live = true
-    Promise.all([getStations(), getEvents(), getEmptyings()]).then(([s, e, emptied]) => {
-      if (!live) return
-      setStations(s)
-      setEvents(e)
-      setEmptyings(emptied)
-    })
+    const load = () =>
+      Promise.all([getStations(), getEvents(), getEmptyings()])
+        .then(([s, e, emptied]) => {
+          if (!live) return
+          setStations(s)
+          setEvents(e)
+          setEmptyings(emptied)
+          setError(false)
+        })
+        .catch(() => live && setError(true))
+    load()
+    // Real data keeps arriving, so ask again every few seconds.
+    const timer = IS_LIVE ? setInterval(load, 4000) : undefined
     return () => {
       live = false
+      clearInterval(timer)
     }
   }, [])
 
@@ -141,14 +150,19 @@ export default function Dashboard() {
               </span>
             )}
           </div>
-          <p className="mt-2 text-white/75">Sorting statistics. Counts only, no images.</p>
+          <p className="mt-2 text-white/75">
+            Sorting statistics. Counts only, no images.
+            {IS_LIVE && error && events !== null ? ' Connection to the data server lost; showing the last data received.' : ''}
+          </p>
 
           <div className="mt-6">
             <FilterBar stations={stations} filters={filters} onChange={setFilters} />
           </div>
 
           {events === null ? (
-            <p className="py-24 text-center text-white/75">Loading…</p>
+            <p className="py-24 text-center text-white/75">
+              {error ? 'Cannot reach the data server. Is it running?' : 'Loading…'}
+            </p>
           ) : (
             <div className="mt-6 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
               <div className="space-y-4">
@@ -196,7 +210,8 @@ export default function Dashboard() {
           <EventFeed events={filtered} stations={stationById} />
 
           <p className="px-1 pt-2 text-sm text-ink/50">
-            Showing demo data in the format the station sends. No images are captured or stored, only counts.
+            {IS_LIVE ? 'Live data from the station.' : 'Showing demo data in the format the station sends.'} No images are
+            captured or stored, only counts.
           </p>
         </main>
       )}
