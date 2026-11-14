@@ -1,0 +1,13 @@
+# secrets
+.ei_key
+*.key
+.env
+kaggle.json
+access_token
+
+# data and environments
+data/
+.venv/
+__pycache__/
+*.zip
+.DS_Store
