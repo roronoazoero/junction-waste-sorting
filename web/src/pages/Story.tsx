@@ -20,10 +20,6 @@ const WHY = [
     title: 'Behaviour',
     body: 'Immediate feedback improves sorting accuracy, and the effect lasts after the feedback stops.',
   },
-  {
-    title: 'Everyone',
-    body: 'Sound and icons help international students and staff, and people with impaired vision.',
-  },
 ]
 
 function Hero() {
@@ -107,11 +103,14 @@ function Problem() {
 
 function Privacy() {
   return (
-    <section className="relative isolate overflow-hidden bg-mint px-4 py-24 text-forest sm:px-6 md:py-36">
+    <section id="privacy" className="relative isolate overflow-hidden bg-mint px-4 py-24 text-forest sm:px-6 md:py-36">
       <Sprig className="pointer-events-none absolute -right-10 -bottom-24 -z-10 h-[120%] rotate-12 text-forest/10" leaves={9} />
       <div className="mx-auto max-w-6xl">
         <Reveal>
-          <h2 className="display text-[clamp(3.5rem,13vw,11rem)] uppercase">Counts, not pictures</h2>
+          <h2 className="display max-w-5xl text-[clamp(3rem,9vw,8rem)] uppercase">
+            We count. <br className="max-sm:hidden" />
+            We don't photograph.
+          </h2>
         </Reveal>
         <div className="mt-14 grid gap-8 border-t border-forest/25 pt-8 md:grid-cols-3">
           {[
@@ -137,7 +136,7 @@ function Why() {
         <Reveal>
           <h2 className="display max-w-3xl text-5xl sm:text-7xl">Why it matters</h2>
         </Reveal>
-        <div className="mt-12 grid border-t border-l border-ink/20 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid border-t border-l border-ink/20 sm:grid-cols-3">
           {WHY.map((w, i) => (
             <div key={w.title} className="border-r border-b border-ink/20 p-6">
               <Reveal delay={i * 0.06}>

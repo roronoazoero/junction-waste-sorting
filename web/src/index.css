@@ -77,17 +77,38 @@ body {
   animation: fade-in 800ms var(--ease-out-strong) both;
 }
 
-/* How-it-works: steps cross-fade as the page scrolls. Transitions, so they retarget mid-scroll. */
-.hiw-step {
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 350ms var(--ease-out-strong), transform 350ms var(--ease-out-strong);
+/* Plants grow in: the stem draws from the root up, each leaf unfolds from its base in turn. */
+.sprig-stem {
+  stroke-dasharray: 1;
 }
-.hiw-step[data-active="true"] {
-  opacity: 1;
-  transform: translateY(0);
+.sprig-leaf {
+  transform: scale(var(--s));
+  transform-box: fill-box;
+  transform-origin: 0 50%;
 }
+.sprig[data-grow="false"] .sprig-stem {
+  stroke-dashoffset: 1;
+}
+.sprig[data-grow="false"] .sprig-leaf {
+  transform: scale(0);
+}
+.sprig[data-grow="true"] .sprig-stem {
+  animation: sprig-stem 1600ms var(--ease-out-strong) both;
+}
+.sprig[data-grow="true"] .sprig-leaf {
+  animation: sprig-leaf 800ms var(--ease-out-strong) calc(250ms + var(--i) * 140ms) both;
+}
+@keyframes sprig-stem {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes sprig-leaf {
+  from { transform: scale(0); }
+  to { transform: scale(var(--s)); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .word-rise { animation-name: fade-in; }
-  .hiw-step { transform: none; transition-property: opacity; }
+  .sprig .sprig-stem { animation: none; stroke-dashoffset: 0; }
+  .sprig .sprig-leaf { animation: none; transform: scale(var(--s)); }
 }
