@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { HowItWorks } from '../components/story/HowItWorks'
 import { CountUp, Reveal, useSmoothScroll } from '../components/ui/motion'
+import { NatureBackdrop, Sprig } from '../components/ui/Nature'
 import { accuracy, score } from '../data/metrics'
 import { getEvents } from '../data/source'
 
@@ -31,7 +32,8 @@ function Hero() {
   const lift = useTransform(scrollY, [0, 700], [0, reduce ? 0 : -90])
 
   return (
-    <section className="flex min-h-[100svh] flex-col justify-between bg-forest text-lime">
+    <section className="relative isolate flex min-h-[100svh] flex-col justify-between bg-forest text-lime">
+      <NatureBackdrop className="opacity-70" />
       <header className="fade-in flex items-center justify-between px-4 py-5 text-sm sm:px-6">
         <span className="text-lg font-semibold tracking-tight">Binwise</span>
         <nav className="flex gap-5">
@@ -47,7 +49,7 @@ function Hero() {
       <div className="grid items-end gap-8 px-4 pb-8 sm:px-6 md:grid-cols-[1fr_auto]">
         <div className="fade-in max-w-xs" style={{ animationDelay: '500ms' }}>
           <p className="text-lg leading-snug">
-            An AI sorting coach that sits on the bin and tells you, right there, if you got it right.
+            A sorting assistant that sits on the bin and tells you, right there, if you got it right.
           </p>
           <p className="mt-10 text-xs tracking-wide uppercase">Scroll down</p>
         </div>
@@ -112,7 +114,8 @@ function Problem() {
 
 function Privacy() {
   return (
-    <section className="bg-mint px-4 py-24 text-forest sm:px-6 md:py-36">
+    <section className="relative isolate overflow-hidden bg-mint px-4 py-24 text-forest sm:px-6 md:py-36">
+      <Sprig className="pointer-events-none absolute -right-10 -bottom-24 -z-10 h-[120%] rotate-12 text-forest/10" leaves={9} />
       <div className="mx-auto max-w-6xl">
         <Reveal>
           <h2 className="display text-[clamp(3.5rem,13vw,11rem)] uppercase">Counts, not pictures</h2>
@@ -172,7 +175,8 @@ function Cta() {
   }, [])
 
   return (
-    <section className="bg-lime px-4 py-24 text-forest-deep sm:px-6 md:py-36">
+    <section className="relative isolate overflow-hidden bg-lime px-4 py-24 text-forest-deep sm:px-6 md:py-36">
+      <Sprig className="pointer-events-none absolute -top-32 right-[6%] -z-10 h-[130%] rotate-[170deg] text-forest/15" />
       <div className="mx-auto max-w-6xl">
         <Reveal>
           <h2 className="display text-[clamp(3.5rem,12vw,10rem)] uppercase">See what the bins say</h2>

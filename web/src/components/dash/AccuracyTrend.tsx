@@ -1,29 +1,31 @@
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { DayPoint } from '../../data/metrics'
-import { Card } from './Card'
 
+/** Daily accuracy, drawn on a frosted panel in the dashboard hero. */
 export function AccuracyTrend({ points }: { points: DayPoint[] }) {
   return (
-    <Card title="Accuracy over time" hint="Share of items sorted correctly, per day. A rising line is the learning effect.">
+    <section className="glass p-4 sm:p-5">
+      <h2 className="text-lg font-medium tracking-tight">Accuracy over time</h2>
+      <p className="mt-1 text-sm text-white/70">Share of items sorted correctly, per day.</p>
       {points.length < 2 ? (
-        <p className="py-10 text-center text-sm text-ink/60">Pick a longer period to see a trend.</p>
+        <p className="py-16 text-center text-sm text-white/70">Pick a longer period to see a trend.</p>
       ) : (
-        <div className="h-64">
+        <div className="mt-4 h-56">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={points} margin={{ top: 8, right: 12, bottom: 0, left: -16 }}>
-              <CartesianGrid stroke="#10231a" strokeOpacity={0.08} vertical={false} />
+              <CartesianGrid stroke="#ffffff" strokeOpacity={0.14} vertical={false} />
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 12, fill: '#10231a99' }}
+                tick={{ fontSize: 12, fill: '#ffffffb3' }}
                 tickLine={false}
-                axisLine={{ stroke: '#10231a33' }}
+                axisLine={{ stroke: '#ffffff40' }}
                 minTickGap={28}
               />
               <YAxis
                 domain={[0, 100]}
                 ticks={[0, 25, 50, 75, 100]}
                 tickFormatter={(v: number) => `${v}%`}
-                tick={{ fontSize: 12, fill: '#10231a99' }}
+                tick={{ fontSize: 12, fill: '#ffffffb3' }}
                 tickLine={false}
                 axisLine={false}
               />
@@ -32,21 +34,22 @@ export function AccuracyTrend({ points }: { points: DayPoint[] }) {
                   `${value}% correct (${(item.payload as DayPoint).count} items)`,
                   'Accuracy',
                 ]}
-                contentStyle={{ borderRadius: 12, border: '1px solid #10231a26', fontSize: 13 }}
+                contentStyle={{ borderRadius: 12, border: 'none', fontSize: 13, color: '#10231a' }}
+                cursor={{ stroke: '#ffffff66' }}
               />
               <Line
                 type="monotone"
                 dataKey="accuracy"
-                stroke="#0b3d24"
+                stroke="#8be04e"
                 strokeWidth={2.5}
                 dot={false}
-                activeDot={{ r: 5, fill: '#0b3d24' }}
+                activeDot={{ r: 5, fill: '#8be04e', stroke: '#072a19' }}
                 isAnimationActive={false}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
-    </Card>
+    </section>
   )
 }

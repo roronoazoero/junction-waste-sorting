@@ -1,5 +1,5 @@
-import { generateMockEvents, MOCK_STATIONS } from './mock'
-import type { SortEvent, Station } from './types'
+import { generateMockEmptyings, generateMockEvents, MOCK_STATIONS } from './mock'
+import type { EmptiedEvent, SortEvent, Station } from './types'
 
 // The single seam between the UI and the data.
 // Going live: replace these bodies with fetch() calls to the ingest API
@@ -11,4 +11,8 @@ export async function getStations(): Promise<Station[]> {
 
 export async function getEvents(): Promise<SortEvent[]> {
   return generateMockEvents()
+}
+
+export async function getEmptyings(): Promise<EmptiedEvent[]> {
+  return generateMockEmptyings()
 }

@@ -41,3 +41,10 @@ export interface SortEvent {
   landedBin?: BinId
   mode: 'guide' | 'challenge'
 }
+
+/** Sent when a bin is emptied. The "what is in each bin" cards count from the latest one. */
+export interface EmptiedEvent {
+  ts: number
+  stationId: string
+  bin: BinId
+}

@@ -1,5 +1,5 @@
 import { BINS } from './types'
-import type { BinId, SortEvent } from './types'
+import type { BinId, EmptiedEvent, SortEvent } from './types'
 
 /** Below this the station showed "?"; those events are counted but not scored. */
 export const LOW_CONFIDENCE = 0.6
@@ -73,17 +73,6 @@ export function misSortFlows(scored: ScoredEvent[]): MisSortFlow[] {
   return flows.sort((a, b) => b.rate - a.rate)
 }
 
-/** matrix[wasteType][actualBin] = count */
-export function confusionMatrix(scored: ScoredEvent[]): Record<BinId, Record<BinId, number>> {
-  const m = {
-    bio: { bio: 0, plastic: 0, mixed: 0 },
-    plastic: { bio: 0, plastic: 0, mixed: 0 },
-    mixed: { bio: 0, plastic: 0, mixed: 0 },
-  }
-  for (const e of scored) m[e.category][e.actual]++
-  return m
-}
-
 export interface DayPoint {
   day: number
   label: string
@@ -130,24 +119,48 @@ export function accuracyByGroup(scored: ScoredEvent[], keyOf: (e: ScoredEvent) =
     .sort((a, b) => (a.accuracy ?? 0) - (b.accuracy ?? 0))
 }
 
-export interface ButtonVsSensor {
-  /** Events that have both a button press and a sensor reading. */
-  total: number
-  pressedRightThrewWrong: number
-  pressedWrong: number
-  /** Pressed the wrong button, got the red light, and threw it in the right bin after all. */
-  correctedAfterFeedback: number
+/** Rough number of items a bin holds before it needs emptying. Tune per site. */
+export const BIN_CAPACITY_ITEMS = 150
+
+export interface BinStationFill {
+  stationId: string
+  /** Items in this station's bin since it was last emptied. */
+  count: number
+  /** Null if the bin has never been reported as emptied. */
+  lastEmptied: number | null
 }
 
-export function buttonVsSensor(events: SortEvent[]): ButtonVsSensor {
-  const both = events.filter(
-    (e) => e.chosenBin !== undefined && e.landedBin !== undefined && e.confidence >= LOW_CONFIDENCE,
-  )
-  const pressedWrong = both.filter((e) => e.chosenBin !== e.category)
-  return {
-    total: both.length,
-    pressedRightThrewWrong: both.filter((e) => e.chosenBin === e.category && e.landedBin !== e.category).length,
-    pressedWrong: pressedWrong.length,
-    correctedAfterFeedback: pressedWrong.filter((e) => e.landedBin === e.category).length,
+export interface BinNow extends BinPurity {
+  /** Every item in the bin right now, including ones the classifier was unsure about. */
+  inBin: number
+  perStation: BinStationFill[]
+  fullest: BinStationFill | null
+}
+
+/**
+ * What is in each bin right now: throws since that station's bin was last emptied.
+ * Nothing is deleted on emptying; the count simply starts from the latest emptied event.
+ */
+export function binsNow(events: SortEvent[], emptyings: EmptiedEvent[], stationIds: string[]): BinNow[] {
+  const last = new Map<string, number>()
+  for (const e of emptyings) {
+    const key = e.stationId + '|' + e.bin
+    if (e.ts > (last.get(key) ?? 0)) last.set(key, e.ts)
   }
+  const wanted = new Set(stationIds)
+  const current = events.filter((e) => {
+    const bin = actualBin(e)
+    if (bin === undefined || !wanted.has(e.stationId)) return false
+    return e.ts > (last.get(e.stationId + '|' + bin) ?? 0)
+  })
+  const purities = binPurity(score(current))
+  return purities.map((p) => {
+    const perStation = stationIds.map((stationId) => ({
+      stationId,
+      count: current.filter((e) => e.stationId === stationId && actualBin(e) === p.bin).length,
+      lastEmptied: last.get(stationId + '|' + p.bin) ?? null,
+    }))
+    const fullest = perStation.reduce<BinStationFill | null>((a, b) => (a === null || b.count > a.count ? b : a), null)
+    return { ...p, inBin: perStation.reduce((sum, s) => sum + s.count, 0), perStation, fullest }
+  })
 }

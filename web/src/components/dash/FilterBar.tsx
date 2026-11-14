@@ -12,7 +12,7 @@ export interface Filters {
 export const DEFAULT_FILTERS: Filters = { site: '', floor: '', room: '', days: 30, mode: 'all' }
 
 const selectClass =
-  'h-10 rounded-full border border-ink/20 bg-white/80 px-4 text-sm text-ink disabled:opacity-40 focus:outline-2 focus:outline-forest'
+  'h-10 rounded-full border border-white/30 bg-white/15 px-4 text-sm text-white backdrop-blur-md disabled:opacity-45 focus:outline-2 focus:outline-lime [&>option]:text-ink'
 
 export function FilterBar({
   stations,
@@ -92,7 +92,7 @@ export function FilterBar({
       {!isDefault && (
         <button
           type="button"
-          className="h-10 rounded-full px-3 text-sm text-ink/70 underline underline-offset-4 hover:text-ink"
+          className="h-10 rounded-full px-3 text-sm text-white/80 underline underline-offset-4 hover:text-white"
           onClick={() => onChange(DEFAULT_FILTERS)}
         >
           Reset

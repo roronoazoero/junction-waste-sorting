@@ -12,7 +12,7 @@ export function Card({
   className?: string
 }) {
   return (
-    <section className={`rounded-2xl border border-ink/15 bg-white/70 p-5 sm:p-6 ${className}`}>
+    <section className={`rounded-3xl bg-white p-5 shadow-[0_1px_2px_rgb(16_35_26/0.06)] sm:p-6 ${className}`}>
       <h2 className="text-lg font-medium tracking-tight">{title}</h2>
       {hint && <p className="mt-1 text-sm text-ink/60">{hint}</p>}
       <div className="mt-5">{children}</div>

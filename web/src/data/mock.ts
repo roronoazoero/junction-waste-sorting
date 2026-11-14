@@ -1,4 +1,4 @@
-import type { BinId, SortEvent, Station } from './types'
+import type { BinId, EmptiedEvent, SortEvent, Station } from './types'
 
 // Deterministic fake data in the same shape the station will send.
 
@@ -85,4 +85,22 @@ export function generateMockEvents(): SortEvent[] {
     }
   }
   return events.sort((a, b) => a.ts - b.ts)
+}
+
+// Bio-waste is emptied most often, plastic least. Stations are offset so they do not all empty on the same day.
+const EMPTY_EVERY_DAYS: Record<BinId, number> = { bio: 2, plastic: 4, mixed: 3 }
+
+export function generateMockEmptyings(): EmptiedEvent[] {
+  const out: EmptiedEvent[] = []
+  MOCK_STATIONS.forEach((st, index) => {
+    for (const bin of ['bio', 'plastic', 'mixed'] as BinId[]) {
+      for (let d = DAYS - 1; d >= 0; d--) {
+        if ((d + index) % EMPTY_EVERY_DAYS[bin] !== 0) continue
+        const morning = new Date(END - d * DAY_MS)
+        morning.setHours(7, 0, 0, 0)
+        if (morning.getTime() <= END) out.push({ ts: morning.getTime(), stationId: st.id, bin })
+      }
+    }
+  })
+  return out.sort((a, b) => a.ts - b.ts)
 }
