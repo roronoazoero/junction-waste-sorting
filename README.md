@@ -11,7 +11,7 @@ the game: buttons for each bin, sounds, faces and lights.
 - `body/` – enclosure files (to come)
 
 ## Model
-Classes: `plastic`, `bio`, `mixed`, and `nothing` (empty scan zone, added from our own photos).
+Classes: `plastic`, `bio`, `mixed`, and `nothing` (no item in view, from our own photos of the venue).
 Source data: Kaggle `mostafaabla/garbage-classification` and the real-world photos from `alistairking/recyclable-and-household-waste-classification`, 500 images per class, 80/20 split, plus one rotated copy of each training image. Model: MobileNetV2 160x160 0.5.
 
 ```bash
@@ -23,6 +23,6 @@ python model/prepare_data.py upload <out_dir>   # reads the API key from ~/.ei_k
 `model/exported/` holds the model trained in Edge Impulse (MobileNetV2 160x160 0.5):
 - `waste_float32.tflite` – full precision, the one to use on the UNO Q
 - `waste_int8.tflite` – compressed version
-- `labels.txt` – output order: bio, mixed, plastic
+- `labels.txt` – output order: bio, mixed, nothing, plastic
 
-Input is a 160x160 RGB image. On 302 held-out test images it scores 87% (14 Nov, with our first demo-item photos added).
+Input is a 160x160 RGB image. On 314 held-out test images it scores 89.5% (14 Nov evening, with the `nothing` class from our own background photos).
