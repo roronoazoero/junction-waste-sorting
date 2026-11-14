@@ -1,0 +1,15 @@
+{
+  "bins": [
+    {"device_id": "<ATECH_PROJECT_ID_1>", "bin": "bio"},
+    {"device_id": "<ATECH_PROJECT_ID_2>", "bin": "plastic"},
+    {"device_id": "<ATECH_PROJECT_ID_3>", "bin": "mixed"}
+  ],
+  "feedback_device": "<ATECH_PROJECT_ID_1>",
+  "actions": {"correct": "correct", "wrong": "wrong", "here": "here"},
+  "min_confidence": 0.7,
+  "stable_frames": 3,
+  "hold_seconds": 15,
+  "drop_fraction": 0.3,
+  "min_drop_mm": 60,
+  "cooldown_seconds": 2.5
+}
