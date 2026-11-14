@@ -1,7 +1,7 @@
 # Project context: trash-sorting game (Junction 2026)
 
 Paste this whole file into the Arduino App Lab assistant or the Atech assistant before
-asking a question, so it knows the full setup. Section 9 has ready-made questions.
+asking a question, so it kngitows the full setup. Section 9 has ready-made questions.
 
 ## 1. What we are building
 A game that teaches correct waste sorting. A player shows a piece of trash to a camera,
@@ -38,7 +38,7 @@ flowchart LR
 - The three Atech boards do not know about each other. Each is its own project/folder on
   atech.dev and has its own device ID.
 - The UNO Q is the only coordinator. It needs internet access (Wi-Fi) because all Atech
-  traffic goes through Atech's cloud gateway.
+  traffic goes through Atech's cloud gateway. #note not stored in cloud, but locally (needs wiring)
 - The feedback board (screen + speaker) can be one of the three bin boards or a fourth one.
 
 ## 4. Data flow, step by step
