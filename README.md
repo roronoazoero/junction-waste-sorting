@@ -97,8 +97,10 @@ hardware dependencies. `main.py` connects it to the camera brick and the Atech g
 
 ## Atech side
 
-The Atech firmware is generated in Atech Studio and is not part of this repo. The boards and
-the UNO Q exchange these messages through `wss://gateway.atech.dev/ws/live/<project id>`:
+The Atech firmware is generated in Atech Studio and is not part of this repo. Our Atech project
+is published here: https://atech.dev/p/8d90ecca228f4f5abd71400e48543313
+
+The boards and the UNO Q exchange these messages through `wss://gateway.atech.dev/ws/live/<project id>`:
 
 - **Bin board to UNO Q**, about 10 times a second:
   `{"type":"distance","payload":{"board":"<MAC>","seq":1,"t_ms":2,"min_mm":385}}`
