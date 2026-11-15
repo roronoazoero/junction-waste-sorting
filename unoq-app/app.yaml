@@ -1,0 +1,11 @@
+name: Waste Classifier
+description: Classifies trash on camera and judges which bin it was dropped in
+ports: []
+bricks:
+- arduino:video_image_classification:
+    model: person-classification
+    variables:
+      # our Edge Impulse model; this path overrides the catalogue model above
+      EI_V_CLASSIFICATION_MODEL: /home/arduino/.arduino-bricks/ei-models/waste-sorting.eim
+- arduino:web_ui: {}
+icon: ♻️
