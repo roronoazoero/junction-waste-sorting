@@ -246,6 +246,19 @@
   height: 14px;
   flex: none;
 }
+.s3-face-big {
+  width: 24px;
+  height: 24px;
+}
+/* One short line of text above the face: the text row stays clear of the panel's pin. */
+.s3-screen-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 1px;
+  font-size: 7.5px;
+  line-height: 1;
+}
 .s3-screen {
   position: absolute;
   left: 7px;

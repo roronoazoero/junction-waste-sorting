@@ -75,11 +75,12 @@ function Camera({ x, y, z, r = 20, depth = 30 }: { x: number; y: number; z: numb
   )
 }
 
-/** The face the robot shows on its screen. It blinks; happy comes with cheeks. */
-export function Face({ mood }: { mood: Mood }) {
+/** The face the robot shows on its screen. It blinks; happy comes with cheeks.
+ *  `big` is for a screen that shows the face and nothing else. */
+export function Face({ mood, big = false }: { mood: Mood; big?: boolean }) {
   const mouth = mood === 'happy' ? 'M5 12 Q10 17 15 12' : mood === 'sad' ? 'M5 15 Q10 10.5 15 15' : 'M7 12.5 Q10 15 13 12.5'
   return (
-    <svg viewBox="0 0 20 20" className="s3-face-icon" aria-hidden="true">
+    <svg viewBox="0 0 20 20" className={`s3-face-icon ${big ? 's3-face-big' : ''}`} aria-hidden="true">
       <g className="s3-eyes" fill="currentColor">
         <circle cx="6.5" cy="7" r="1.6" />
         <circle cx="13.5" cy="7" r="1.6" />

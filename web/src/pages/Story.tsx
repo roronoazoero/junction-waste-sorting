@@ -1,5 +1,5 @@
-import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
-import { useEffect, useState } from 'react'
+import { motion, useInView, useReducedMotion, useScroll, useTransform } from 'motion/react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { HowItWorks } from '../components/story/HowItWorks'
 import { CountUp, Reveal, useSmoothScroll } from '../components/ui/motion'
@@ -30,9 +30,12 @@ function Hero() {
   return (
     <section className="relative isolate flex min-h-[100svh] flex-col justify-between bg-forest text-lime">
       <NatureBackdrop className="opacity-70" />
-      <header className="fade-in flex items-center justify-between px-4 py-5 text-sm sm:px-6">
-        <span className="text-lg font-semibold tracking-tight">Binwise</span>
-        <nav className="flex gap-5">
+      <header className="fade-in flex items-center justify-between gap-4 px-4 py-5 text-sm sm:px-6">
+        <span className="text-lg tracking-tight">
+          <span className="font-semibold">Binwise</span>
+          <span className="text-sm sm:text-lg"> - A project for Arduino and Atech</span>
+        </span>
+        <nav className="flex shrink-0 gap-5">
           <a href="#how" className="hover:text-cream">
             How it works
           </a>
@@ -139,6 +142,48 @@ function Privacy() {
   )
 }
 
+/** The real station, filmed. Plays muted while it is on screen; the controls turn the sound on. */
+function DemoVideo() {
+  const ref = useRef<HTMLVideoElement>(null)
+  const inView = useInView(ref, { amount: 0.5 })
+  const reduce = useReducedMotion()
+  useEffect(() => {
+    const video = ref.current
+    if (!video || reduce) return
+    if (inView) video.play().catch(() => {})
+    else video.pause()
+  }, [inView, reduce])
+
+  return (
+    <section id="demo" className="bg-forest-deep px-4 py-24 text-cream sm:px-6 md:py-32">
+      <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-[2fr_3fr]">
+        <Reveal>
+          <p className="text-sm text-cream/70">The real thing</p>
+          <h2 className="display mt-4 text-5xl sm:text-6xl">
+            Come to table <span className="text-lime">B23</span>
+          </h2>
+          <p className="mt-5 max-w-md text-lg text-cream/75">
+            This is a physical project, so come to table B23 to check out our demo!
+          </p>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <video
+            ref={ref}
+            className="aspect-video w-full rounded-2xl bg-black object-cover shadow-2xl shadow-black/40"
+            src="/demo.mp4"
+            poster="/demo-poster.jpg"
+            controls
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          />
+        </Reveal>
+      </div>
+    </section>
+  )
+}
+
 function Why() {
   return (
     <section className="bg-cream px-4 py-24 sm:px-6 md:py-32">
@@ -211,11 +256,15 @@ export default function Story() {
       <Hero />
       <Problem />
       <HowItWorks />
+      <DemoVideo />
       <Privacy />
       <Why />
       <Cta />
       <footer className="bg-forest-deep px-4 py-8 text-sm text-cream/60 sm:px-6">
-        Binwise · Junction 2026 · Runs on the Arduino UNO Q
+        Binwise · Junction 2026 · Runs on the Arduino UNO Q ·{' '}
+        <a href="https://atech.dev" target="_blank" rel="noreferrer" className="underline-offset-4 hover:text-cream hover:underline">
+          atech.dev
+        </a>
       </footer>
     </main>
   )

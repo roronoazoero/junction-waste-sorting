@@ -20,9 +20,10 @@ export function useSmoothScroll() {
   }, [reduce])
 }
 
-/** Scroll the page to `top`, through Lenis when it is running so the two do not fight. */
-export function scrollPageTo(top: number) {
-  if (lenis) lenis.scrollTo(top, { duration: 1.4 })
+/** Scroll the page to `top`, through Lenis when it is running so the two do not fight.
+ *  `immediate` jumps there without the glide. */
+export function scrollPageTo(top: number, immediate = false) {
+  if (lenis) lenis.scrollTo(top, immediate ? { immediate: true } : { duration: 1.4 })
   else window.scrollTo({ top, behavior: 'auto' })
 }
 

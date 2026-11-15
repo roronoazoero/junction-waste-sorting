@@ -10,6 +10,8 @@ import type { Bin, GridState, HoleState, Tone, Zoom } from './Station3D'
 const ITEM_BIN: Bin = 'bio'
 const BINS: Bin[] = ['bio', 'plastic', 'mixed']
 const BIN_NAME: Record<Bin, string> = { bio: 'bio', plastic: 'plastic', mixed: 'mixed waste' }
+// As printed on the front of the bin, and on the robot's screen after a wrong drop.
+const ITEM_BIN_LABEL = 'Bio'
 
 // Five stages, revealed by scrolling. Stage 2 waits for a click; scrolling past it lets the robot sort.
 const STAGES = 5
@@ -38,7 +40,7 @@ function copyFor(stage: number, correct: boolean | null, bin: Bin | null): Copy 
     case 1:
       return {
         title: 'Recognised on the device',
-        body: 'The classifier on the Arduino UNO Q decides: bio-waste. The screen says it and a light comes on around the bio bin. Nothing leaves the board. Now drop it in a bin.',
+        body: 'The classifier on the Arduino UNO Q decides: bio-waste. A light comes on around the bio bin. Nothing leaves the board. Now drop it in a bin.',
       }
     case 2:
       return {
@@ -134,6 +136,18 @@ export function HowItWorks() {
     if (!dropped) return
     const t = setTimeout(() => setFeedbackSeen(true), FEEDBACK_MS)
     return () => clearTimeout(t)
+  }, [dropped])
+
+  // A click drops the peel while the page is still scrolled to an earlier stage. The pinned
+  // view looks the same anywhere in the section, so jump the page to the feedback stage
+  // unseen: from here the visitor's next scroll moves on, without waiting for the idle timer.
+  useEffect(() => {
+    const el = ref.current
+    if (!dropped || !el) return
+    const top = el.getBoundingClientRect().top + window.scrollY
+    const range = el.offsetHeight - window.innerHeight
+    const feedbackTop = top + (3 / STAGES + 0.04) * range
+    if (window.scrollY < feedbackTop && window.scrollY >= top) scrollPageTo(feedbackTop, true)
   }, [dropped])
 
   // Each stage brings its own camera move, so the visitor's spin eases back to neutral.
@@ -311,19 +325,15 @@ export function HowItWorks() {
         {looking ? 'Scanning…' : 'Show me'}
       </>
     ) : stage <= 2 ? (
-      <>
-        <Face mood="idle" />
-        Bio bin
-      </>
-    ) : stage === 3 ? (
-      <>
-        <Face mood={correct ? 'happy' : 'sad'} />
-        {correct ? 'Correct!' : 'Wrong bin'}
-      </>
-    ) : correct ? (
-      '+1 correct'
+      <Face mood="idle" big />
+    ) : stage === 3 && !correct ? (
+      // A wrong drop: the sad face, and where the item should have gone. Nothing else.
+      <span className="s3-screen-stack">
+        <Face mood="sad" />
+        Goes in: {ITEM_BIN_LABEL}
+      </span>
     ) : (
-      '+1 wrong'
+      <Face mood={correct ? 'happy' : 'sad'} big />
     )
 
   const copy = copyFor(stage, correct, dropped)
